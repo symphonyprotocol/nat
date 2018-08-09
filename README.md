@@ -1,9 +1,9 @@
 ## NAT library for Golang
 
 This library is for NAT port mapping *only*!
-* Support UPnP
-* Will Support NAT-PMP
-* Additional Support DMZ 
+* Currently Support UPnP for IGD v1 & v2
+* Support NAT-PMP (by plan)
+* Support DMZ (by plan)
 
 ### Installation
 
