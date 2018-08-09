@@ -1,20 +1,3 @@
-## NAT library for Golang
-
-This library is for NAT port mapping *only*!
-* Support UPnP
-* Will Support NAT-PMP
-* Additional Support DMZ 
-
-### Installation
-
-```
-Run go get https://github.com/symphonyprotocol/nat
-```
-
-### Usage
-1. UPnP port mapping
-
-```
 package main
 
 import (
@@ -36,11 +19,9 @@ func main() {
 		if ok := upnp.AddPortMapping(ips[0], 1234, 1234, "TCP", client); ok {
 			fmt.Println("add UDP success")
 		}
-		if ok := upnp.DeletePortMapping(1234, "UDP", client); ok {
-			fmt.Println("delete success")
-		}
+		//if ok := upnp.DeletePortMapping(1234, "UDP", client); ok {
+		//	fmt.Println("delete success")
+		//}
 	}
 
 }
-```
-
