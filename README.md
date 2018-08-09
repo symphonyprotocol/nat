@@ -1,0 +1,2 @@
+# nat
+nat upnp
