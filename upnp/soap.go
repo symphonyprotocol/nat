@@ -16,6 +16,12 @@ type ExternalIPAddress struct {
 	IPAddress string `xml:"NewExternalIPAddress"`
 }
 
+type GetGenericPortMappingEntryResponse struct {
+	NewProtocol       string `xml:"NewProtocol"`
+	NewInternalClient string `xml:"NewInternalClient"`
+	NewPort           int    `xml:"NewExternalPort"`
+}
+
 type SOAPNode struct {
 	Name       string
 	Value      string
@@ -130,6 +136,39 @@ func GetExternalIPAddress(u *UPnPClient) (string, error) {
 	return externalIP.IPAddress, nil
 }
 
+func GetGenericPortMappingEntry(index int, u *UPnPClient) (string, string, int, error) {
+	soap := &SOAPNode{
+		Name: "u:GetGenericPortMappingEntry",
+		Attributes: map[string]string{
+			"xmlns:u=": "\"" + u.ServiceType + "\"",
+		},
+	}
+	soap.Add(NewSOAPNode("NewPortMappingIndex", strconv.Itoa(index)))
+	resp, err := soapRequest(u.ControlURL, soap, "GetGenericPortMappingEntry", u.ServiceType)
+	if err != nil {
+		fmt.Println(err)
+		return "", "", 0, err
+	}
+	reader := strings.NewReader(resp)
+	decoder := xml.NewDecoder(reader)
+	extPort := GetGenericPortMappingEntryResponse{}
+	for {
+		token, err := decoder.Token()
+		if err != nil || token == nil || token == io.EOF {
+			break
+		}
+		switch t := token.(type) {
+		case xml.StartElement:
+			inElement := t.Name.Local
+			if inElement == "GetGenericPortMappingEntryResponse" {
+				decoder.DecodeElement(&extPort, &t)
+				break
+			}
+		}
+	}
+	return extPort.NewProtocol, extPort.NewInternalClient, extPort.NewPort, nil
+}
+
 func soapRequest(urlStr string, soap *SOAPNode, function string, serviceType string) (string, error) {
 	envelope := &SOAPNode{
 		Name: "s:Envelope",
@@ -142,7 +181,7 @@ func soapRequest(urlStr string, soap *SOAPNode, function string, serviceType str
 	body.Add(soap)
 	envelope.Add(body)
 	sendText := "<?xml version=\"1.0\"?>" + envelope.ToString()
-	fmt.Printf("SOAP post: %v\n", sendText)
+	//fmt.Printf("SOAP post: %v\n", sendText)
 	bodyBytes := []byte(sendText)
 	u, err := url.Parse(urlStr)
 	if err != nil {
@@ -171,6 +210,6 @@ func soapRequest(urlStr string, soap *SOAPNode, function string, serviceType str
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("SOAP recieve: %v", string(bte))
+	//fmt.Printf("SOAP recieve: %v", string(bte))
 	return string(bte), nil
 }

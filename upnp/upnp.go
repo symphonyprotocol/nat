@@ -63,7 +63,6 @@ func (u *UPnPClient) Discover() bool {
 		return false
 	}
 	locations := u.getLocations(resps)
-	fmt.Println(locations)
 	for _, location := range locations {
 		rootDevice, err := u.getXmlReponse(location)
 		if err != nil {
@@ -74,7 +73,6 @@ func (u *UPnPClient) Discover() bool {
 			baseLocaton := location[:strings.LastIndex(location, "/")]
 			u.ControlURL = baseLocaton + controlURL
 			u.ServiceType = serviceType
-			fmt.Printf("get control url %v for servcie type %v\n", u.ControlURL, serviceType)
 			return true
 		}
 	}
