@@ -1,6 +1,7 @@
 package nat
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ func IntranetIP() (ips []string, err error) {
 	}
 
 	for _, iface := range ifaces {
+		fmt.Println(iface)
 		if iface.Flags&net.FlagUp == 0 {
 			continue // interface down
 		}
@@ -84,4 +86,14 @@ func IsIntranet(ipStr string) bool {
 	}
 
 	return false
+}
+
+func GetOutbountIP() (string, error) {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return "", err
+	}
+	defer conn.Close()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP.String(), nil
 }
