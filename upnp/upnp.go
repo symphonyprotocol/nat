@@ -198,7 +198,7 @@ func (u *UPnPClient) search() ([]*http.Response, error) {
 		return nil, err
 	}
 
-	dstAddr, err := net.ResolveUDPAddr("udp", BOARDCAST_ADDR)
+	dstAddr, err := net.ResolveUDPAddr("udp", SSDP_BOARDCAST_ADDR)
 	if err != nil {
 		return nil, err
 	}
@@ -207,6 +207,7 @@ func (u *UPnPClient) search() ([]*http.Response, error) {
 	for i := 0; i < retry; i++ {
 		n, err := u.conn.WriteTo(bte, dstAddr)
 		if err != nil {
+			fmt.Println(err)
 			return nil, err
 		} else if n < len(bte) {
 			return nil, fmt.Errorf("wrote bytes %v must be bigger than request bytess %v", n, len(bte))
