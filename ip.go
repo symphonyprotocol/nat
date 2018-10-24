@@ -1,11 +1,14 @@
 package nat
 
 import (
-	"fmt"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/symphonyprotocol/log"
 )
+
+var ipLogger = log.GetLogger("ip")
 
 func IntranetIP() (ips []string, err error) {
 	ips = make([]string, 0)
@@ -16,7 +19,7 @@ func IntranetIP() (ips []string, err error) {
 	}
 
 	for _, iface := range ifaces {
-		fmt.Println(iface)
+		ipLogger.Debug("%v", ifaces)
 		if iface.Flags&net.FlagUp == 0 {
 			continue // interface down
 		}
