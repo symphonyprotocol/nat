@@ -10,7 +10,11 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/symphonyprotocol/log"
 )
+
+var soapLogger = log.GetLogger("soap")
 
 type ExternalIPAddress struct {
 	IPAddress string `xml:"NewExternalIPAddress"`
@@ -77,7 +81,7 @@ func AddPortMapping(localAddr string, localPort int, remotePort int, protocol st
 	soap.Add(NewSOAPNode("NewLeaseDuration", "0"))
 	_, err := soapRequest(u.ControlURL, soap, "AddPortMapping", u.ServiceType)
 	if err != nil {
-		fmt.Println(err)
+		soapLogger.Error("%v", err)
 		return false
 	}
 	return true
@@ -95,7 +99,7 @@ func DeletePortMapping(remotePort int, protocol string, u *UPnPClient) bool {
 	soap.Add(NewSOAPNode("NewProtocol", protocol))
 	_, err := soapRequest(u.ControlURL, soap, "DeletePortMapping", u.ServiceType)
 	if err != nil {
-		fmt.Println(err)
+		soapLogger.Error("%v", err)
 		return false
 	}
 	return true
@@ -146,7 +150,7 @@ func GetGenericPortMappingEntry(index int, u *UPnPClient) (string, string, int, 
 	soap.Add(NewSOAPNode("NewPortMappingIndex", strconv.Itoa(index)))
 	resp, err := soapRequest(u.ControlURL, soap, "GetGenericPortMappingEntry", u.ServiceType)
 	if err != nil {
-		fmt.Println(err)
+		soapLogger.Error("%v", err)
 		return "", "", 0, err
 	}
 	reader := strings.NewReader(resp)

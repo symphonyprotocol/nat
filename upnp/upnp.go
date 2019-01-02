@@ -1,10 +1,10 @@
 package upnp
 
 import (
+	"fmt"
 	"bufio"
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"github.com/symphonyprotocol/log"
 )
 
 var (
@@ -28,6 +29,8 @@ var (
 	DEVICE_TYPE_WCD     = "urn:schemas-upnp-org:device:WANConnectionDevice"
 	ST_WIPC             = "urn:schemas-upnp-org:service:WANIPConnection"
 	ST_WPPPC            = "urn:schemas-upnp-org:service:WANPPPConnection"
+
+	upnpLogger = log.GetLogger("upnp")
 )
 
 type UPnPClient struct {
@@ -125,16 +128,16 @@ func (u *UPnPClient) getLocations(resps []*http.Response) []string {
 	locations := make([]string, 0)
 	for _, resp := range resps {
 		if resp.StatusCode != 200 {
-			fmt.Printf("upnp get err reponse code %v\n", resp.StatusCode)
+			upnpLogger.Warn("upnp get err reponse code %v", resp.StatusCode)
 			continue
 		}
 		if st := resp.Header.Get("ST"); st != SEARCH_TARGET {
-			fmt.Printf("upnp st not match")
+			upnpLogger.Warn("upnp st not match")
 			continue
 		}
 		location, err := resp.Location()
 		if err != nil {
-			fmt.Printf("upnp no location found: %v\n", err)
+			upnpLogger.Warn("upnp no location found: %v", err)
 			continue
 		}
 		locationStr := strings.ToLower(location.String())
@@ -207,7 +210,7 @@ func (u *UPnPClient) search() ([]*http.Response, error) {
 	for i := 0; i < retry; i++ {
 		n, err := u.conn.WriteTo(bte, dstAddr)
 		if err != nil {
-			fmt.Println(err)
+			upnpLogger.Error("%v", err)
 			return nil, err
 		} else if n < len(bte) {
 			return nil, fmt.Errorf("wrote bytes %v must be bigger than request bytess %v", n, len(bte))
@@ -234,7 +237,7 @@ func (u *UPnPClient) search() ([]*http.Response, error) {
 		}
 		resp, err := http.ReadResponse(bufio.NewReader(bytes.NewBuffer(resultData[:n])), &req)
 		if err != nil {
-			fmt.Printf("error processing response: %v", err)
+			upnpLogger.Error("error processing response: %v", err)
 			return nil, err
 		}
 		resps = append(resps, resp)
